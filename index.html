@@ -529,6 +529,13 @@
     "อื่นๆ": "✍️"
   };
 
+  const PURPOSE_COLOR = {
+    "ส่งอาหาร": 0xFF8C42,
+    "ส่งพัสดุ": 0x4FA6FF,
+    "รับยา": 0x7AE097,
+    "อื่นๆ": 0xC796FF
+  };
+
   function formatThaiTime(date) {
     return new Intl.DateTimeFormat("th-TH-u-ca-buddhist", {
       dateStyle: "long",
@@ -693,24 +700,33 @@
     const guestName = document.getElementById("guestName").value.trim() || "ไม่ระบุชื่อ";
     const guestMsg = document.getElementById("guestMsg").value.trim();
     const emoji = PURPOSE_EMOJI[selectedPurpose] || "🔔";
+    const color = PURPOSE_COLOR[selectedPurpose] || 0xC9974D;
 
     const embed = {
-      title: `${emoji} มีคนกดกริ่ง — ${selectedPurpose}`,
-      color: 0xC9974D,
+      author: { name: "🔔 มีคนกดกริ่งหน้าบ้าน" },
+      title: `${emoji}  ${selectedPurpose}`,
+      description: "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
+      color: color,
       fields: [
-        { name: "ชื่อ", value: guestName, inline: true },
-        { name: "เวลา", value: formatThaiTime(new Date()), inline: true }
-      ]
+        { name: "👤  ชื่อ", value: `\`${guestName}\``, inline: true },
+        { name: "🕐  เวลา", value: formatThaiTime(new Date()), inline: true }
+      ],
+      footer: { text: "MorKwan Home · กริ่งประตู" },
+      timestamp: new Date().toISOString()
     };
     if (guestMsg) {
-      embed.fields.push({ name: "ข้อความ", value: guestMsg, inline: false });
+      embed.fields.push({ name: "💬  ข้อความจากผู้มาเยือน", value: guestMsg, inline: false });
     }
 
     try {
       const res = await fetch(DISCORD_WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ embeds: [embed] })
+        body: JSON.stringify({
+          username: "กริ่งประตู MorKwan",
+          avatar_url: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f514.png",
+          embeds: [embed]
+        })
       });
       if (!res.ok) throw new Error("bad status");
 
