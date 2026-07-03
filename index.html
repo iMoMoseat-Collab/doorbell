@@ -61,6 +61,34 @@
     transition: opacity 1.2s ease, background 1.2s ease;
   }
 
+  .particle-field {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .firefly {
+    position: absolute;
+    bottom: -10px;
+    width: var(--size, 4px);
+    height: var(--size, 4px);
+    border-radius: 50%;
+    background: var(--glow-color, var(--glow));
+    box-shadow: 0 0 8px 2px var(--glow-color, var(--glow));
+    opacity: 0;
+    animation: drift var(--dur, 9s) ease-in var(--delay, 0s) infinite;
+  }
+
+  @keyframes drift {
+    0% { transform: translate(0, 0); opacity: 0; }
+    10% { opacity: var(--peak, 0.7); }
+    50% { transform: translate(var(--sway, 20px), -55vh); }
+    90% { opacity: var(--peak, 0.7); }
+    100% { transform: translate(calc(var(--sway, 20px) * -1), -100vh); opacity: 0; }
+  }
+
   .wrap {
     position: relative;
     z-index: 1;
@@ -71,6 +99,12 @@
     flex-direction: column;
     flex: 1;
     gap: 18px;
+    animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes rise {
+    0% { opacity: 0; transform: translateY(14px); }
+    100% { opacity: 1; transform: translateY(0); }
   }
 
   header { text-align: center; padding-top: 6px; }
@@ -211,16 +245,35 @@
     justify-content: center;
     transition: transform 0.12s ease, box-shadow 0.3s ease, filter 0.3s ease;
     flex-shrink: 0;
+    animation: breathe 3.2s ease-in-out infinite;
   }
 
-  .bell-btn:active { transform: scale(0.94); }
+  @keyframes breathe {
+    0%, 100% { box-shadow: 0 10px 30px rgba(201,151,77,0.35), inset 0 2px 6px rgba(255,255,255,0.35), inset 0 -6px 10px rgba(0,0,0,0.25); }
+    50% { box-shadow: 0 10px 44px rgba(232,192,119,0.6), inset 0 2px 6px rgba(255,255,255,0.4), inset 0 -6px 10px rgba(0,0,0,0.25); }
+  }
+
+  .bell-btn:active { transform: scale(0.9); }
+
+  .bell-btn.ringing {
+    animation: shake 0.5s ease-in-out;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: rotate(0); }
+    20% { transform: rotate(-12deg); }
+    40% { transform: rotate(10deg); }
+    60% { transform: rotate(-7deg); }
+    80% { transform: rotate(4deg); }
+  }
 
   .bell-btn:disabled {
     filter: grayscale(0.4) brightness(0.75);
     cursor: default;
+    animation: none;
   }
 
-  .bell-btn svg { width: 52px; height: 52px; }
+  .bell-btn svg { width: 52px; height: 52px; position: relative; z-index: 2; }
 
   .ring {
     position: absolute;
@@ -232,12 +285,58 @@
   }
 
   .ring.animate {
-    animation: expand 0.9s ease-out forwards;
+    animation: expand 1.1s ease-out forwards;
   }
 
+  .ring.r2.animate { animation-delay: 0.15s; }
+  .ring.r3.animate { animation-delay: 0.3s; }
+
   @keyframes expand {
-    0% { transform: scale(1); opacity: 0.6; }
-    100% { transform: scale(1.9); opacity: 0; }
+    0% { transform: scale(1); opacity: 0.7; }
+    100% { transform: scale(2.4); opacity: 0; }
+  }
+
+  .flash {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at 50% 78%, rgba(255,216,150,0.55), transparent 60%);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  .flash.burst {
+    animation: flashpop 0.6s ease-out forwards;
+  }
+
+  @keyframes flashpop {
+    0% { opacity: 0; }
+    25% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  .sparkle-field {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 4;
+  }
+
+  .sparkle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--brass-light);
+    box-shadow: 0 0 6px 1px var(--brass-light);
+    left: var(--x, 50%);
+    top: var(--y, 70%);
+    animation: sparkle-out 0.9s ease-out forwards;
+  }
+
+  @keyframes sparkle-out {
+    0% { transform: translate(0, 0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--tx, 0), var(--ty, -60px)) scale(0); opacity: 0; }
   }
 
   .ring-caption {
@@ -268,12 +367,16 @@
 
   @media (prefers-reduced-motion: reduce) {
     * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    .firefly, .sparkle { display: none; }
   }
 </style>
 </head>
 <body>
 
 <div class="glow-orb" id="glowOrb"></div>
+<div class="particle-field" id="particleField"></div>
+<div class="flash" id="flashFx"></div>
+<div class="sparkle-field" id="sparkleField"></div>
 
 <div class="wrap">
 
@@ -302,7 +405,9 @@
 
   <div class="ring-zone">
     <button class="bell-btn" id="bellBtn" aria-label="กดกริ่ง">
-      <span class="ring" id="ringFx"></span>
+      <span class="ring r1" id="ringFx"></span>
+      <span class="ring r2" id="ringFx2"></span>
+      <span class="ring r3" id="ringFx3"></span>
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M12 3C9.5 3 8 5 8 7.5v3c0 1.2-.5 2.3-1.4 3.1L5 15.2c-.6.5-.3 1.5.5 1.5h13c.8 0 1.1-1 .5-1.5l-1.6-1.6c-.9-.8-1.4-1.9-1.4-3.1v-3C16 5 14.5 3 12 3z" stroke="#12162B" stroke-width="1.6" stroke-linejoin="round" fill="rgba(10,13,29,0.15)"/>
         <path d="M10 18a2 2 0 0 0 4 0" stroke="#12162B" stroke-width="1.6" stroke-linecap="round"/>
@@ -354,6 +459,22 @@
   document.getElementById("glowOrb").style.setProperty("--glow-color", glowColor);
   document.getElementById("glowOrb").style.setProperty("--glow-opacity", glowOpacity);
 
+  // ---- หิ่งห้อยลอยพื้นหลัง ----
+  const particleField = document.getElementById("particleField");
+  const FIREFLY_COUNT = 16;
+  for (let i = 0; i < FIREFLY_COUNT; i++) {
+    const f = document.createElement("span");
+    f.className = "firefly";
+    f.style.left = `${Math.random() * 100}%`;
+    f.style.setProperty("--size", `${2 + Math.random() * 3}px`);
+    f.style.setProperty("--dur", `${7 + Math.random() * 8}s`);
+    f.style.setProperty("--delay", `${Math.random() * -10}s`);
+    f.style.setProperty("--sway", `${(Math.random() - 0.5) * 60}px`);
+    f.style.setProperty("--peak", `${0.4 + Math.random() * 0.4}`);
+    f.style.setProperty("--glow-color", glowColor);
+    particleField.appendChild(f);
+  }
+
   // ---- เลือกวัตถุประสงค์ ----
   let selectedPurpose = null;
   const chips = document.querySelectorAll(".chip");
@@ -370,10 +491,47 @@
   // ---- กดกริ่ง ----
   const bellBtn = document.getElementById("bellBtn");
   const ringFx = document.getElementById("ringFx");
+  const ringFx2 = document.getElementById("ringFx2");
+  const ringFx3 = document.getElementById("ringFx3");
+  const flashFx = document.getElementById("flashFx");
+  const sparkleField = document.getElementById("sparkleField");
   const ringCaption = document.getElementById("ringCaption");
   const ringStatus = document.getElementById("ringStatus");
 
   let cooldownTimer = null;
+
+  function playRipple() {
+    [ringFx, ringFx2, ringFx3].forEach(el => {
+      el.classList.remove("animate");
+      void el.offsetWidth;
+      el.classList.add("animate");
+    });
+    bellBtn.classList.remove("ringing");
+    void bellBtn.offsetWidth;
+    bellBtn.classList.add("ringing");
+    flashFx.classList.remove("burst");
+    void flashFx.offsetWidth;
+    flashFx.classList.add("burst");
+  }
+
+  function playSparkleBurst() {
+    const rect = bellBtn.getBoundingClientRect();
+    const originX = rect.left + rect.width / 2;
+    const originY = rect.top + rect.height / 2;
+    const count = 18;
+    for (let i = 0; i < count; i++) {
+      const s = document.createElement("span");
+      s.className = "sparkle";
+      const angle = (Math.PI * 2 * i) / count + Math.random() * 0.3;
+      const dist = 50 + Math.random() * 70;
+      s.style.setProperty("--x", `${originX}px`);
+      s.style.setProperty("--y", `${originY}px`);
+      s.style.setProperty("--tx", `${Math.cos(angle) * dist}px`);
+      s.style.setProperty("--ty", `${Math.sin(angle) * dist - 30}px`);
+      sparkleField.appendChild(s);
+      setTimeout(() => s.remove(), 950);
+    }
+  }
 
   function startCooldown(seconds) {
     let remaining = seconds;
@@ -412,9 +570,7 @@
     }
 
     bellBtn.disabled = true;
-    ringFx.classList.remove("animate");
-    void ringFx.offsetWidth; // reflow เพื่อ trigger animation ใหม่
-    ringFx.classList.add("animate");
+    playRipple();
 
     ringCaption.textContent = "กำลังส่ง...";
     ringStatus.textContent = "";
@@ -447,6 +603,7 @@
       ringCaption.textContent = "ส่งแจ้งเตือนแล้ว";
       ringStatus.textContent = "รอสักครู่ เจ้าของบ้านกำลังมา";
       ringStatus.className = "ring-status success";
+      playSparkleBurst();
       startCooldown(COOLDOWN_SECONDS);
     } catch (err) {
       ringCaption.textContent = "ส่งไม่สำเร็จ";
