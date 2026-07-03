@@ -133,6 +133,21 @@
     margin: 0;
   }
 
+  .bloom {
+    position: fixed;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    filter: blur(50px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.28;
+  }
+
+  .bloom.a { top: 18%; left: -60px; background: #FF8C42; }
+  .bloom.b { top: 45%; right: -70px; background: #4FA6FF; }
+  .bloom.c { bottom: 10%; left: -40px; background: #7AE097; }
+
   .panel {
     background: var(--panel);
     border: 1px solid var(--panel-border);
@@ -177,6 +192,53 @@
 
   textarea { resize: none; min-height: 64px; font-family: inherit; }
 
+  .service-scroll {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 2px 2px 8px;
+    margin-bottom: 4px;
+    scrollbar-width: none;
+  }
+
+  .service-scroll::-webkit-scrollbar { display: none; }
+
+  .service-chip {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 14px;
+    border-radius: 999px;
+    border: 1.5px solid transparent;
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #fff;
+    background: linear-gradient(135deg, var(--sv-a), var(--sv-b));
+    box-shadow: 0 4px 14px var(--sv-shadow), inset 0 1px 0 rgba(255,255,255,0.25);
+    transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    filter: saturate(0.82) brightness(0.92);
+  }
+
+  .service-chip svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+  .service-chip:active { transform: scale(0.95); }
+
+  .service-chip.active {
+    filter: saturate(1.25) brightness(1.08);
+    border-color: rgba(255,255,255,0.75);
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px var(--sv-shadow), 0 0 0 3px rgba(255,255,255,0.12), inset 0 1px 0 rgba(255,255,255,0.35);
+  }
+
+  .service-chip.lineman { --sv-a: #7ED957; --sv-b: #1FA341; --sv-shadow: rgba(80,200,90,0.45); }
+  .service-chip.grab    { --sv-a: #4FE0A6; --sv-b: #0F9D6E; --sv-shadow: rgba(20,180,130,0.45); }
+  .service-chip.flash   { --sv-a: #FFC24B; --sv-b: #F4881E; --sv-shadow: rgba(244,140,30,0.45); }
+  .service-chip.post    { --sv-a: #FF7A7A; --sv-b: #D9273F; --sv-shadow: rgba(217,39,63,0.45); }
+  .service-chip.custom  { --sv-a: #B79CFF; --sv-b: #7A5CE0; --sv-shadow: rgba(122,92,224,0.45); }
+
   .chips {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -187,23 +249,30 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(0,0,0,0.22);
-    border: 1px solid var(--panel-border);
+    background: linear-gradient(135deg, var(--pc-a, rgba(0,0,0,0.22)), var(--pc-b, rgba(0,0,0,0.22)));
+    border: 1.5px solid var(--panel-border);
     border-radius: 14px;
     padding: 12px 10px;
     color: var(--cream);
     font-size: 14px;
     font-family: inherit;
     cursor: pointer;
-    transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+    transition: border-color 0.15s ease, transform 0.1s ease, filter 0.2s ease;
     text-align: left;
+    filter: saturate(0.7) brightness(0.85);
   }
+
+  .chip[data-value="ส่งอาหาร"] { --pc-a: rgba(255,140,66,0.35); --pc-b: rgba(255,140,66,0.08); }
+  .chip[data-value="ส่งพัสดุ"] { --pc-a: rgba(79,166,255,0.35); --pc-b: rgba(79,166,255,0.08); }
+  .chip[data-value="รับยา"]   { --pc-a: rgba(122,224,151,0.35); --pc-b: rgba(122,224,151,0.08); }
+  .chip[data-value="อื่นๆ"]    { --pc-a: rgba(199,150,255,0.35); --pc-b: rgba(199,150,255,0.08); }
 
   .chip .emoji { font-size: 18px; }
 
   .chip.active {
-    border-color: var(--brass);
-    background: linear-gradient(135deg, rgba(201,151,77,0.28), rgba(201,151,77,0.10));
+    border-color: rgba(255,255,255,0.55);
+    filter: saturate(1.3) brightness(1.1);
+    transform: translateY(-1px);
   }
 
   .chip:active { transform: scale(0.97); }
@@ -374,6 +443,9 @@
 <body>
 
 <div class="glow-orb" id="glowOrb"></div>
+<div class="bloom a"></div>
+<div class="bloom b"></div>
+<div class="bloom c"></div>
 <div class="particle-field" id="particleField"></div>
 <div class="flash" id="flashFx"></div>
 <div class="sparkle-field" id="sparkleField"></div>
@@ -387,7 +459,29 @@
   </header>
 
   <div class="panel">
-    <label class="field-label" for="guestName">ชื่อของคุณ <span class="opt">(ไม่ระบุก็ได้)</span></label>
+    <label class="field-label" for="guestName">ชื่อของคุณ <span class="opt">(เลือกด่วน หรือพิมพ์เองก็ได้)</span></label>
+    <div class="service-scroll" id="serviceScroll">
+      <button type="button" class="service-chip lineman" data-name="Lineman">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6" cy="18" r="2.4" stroke="currentColor" stroke-width="1.8"/><circle cx="17" cy="18" r="2.4" stroke="currentColor" stroke-width="1.8"/><path d="M6 18l3-8h4l2 4h4M9 10l1.5-3h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Lineman
+      </button>
+      <button type="button" class="service-chip grab" data-name="Grab">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6" cy="18" r="2.4" stroke="currentColor" stroke-width="1.8"/><circle cx="17" cy="18" r="2.4" stroke="currentColor" stroke-width="1.8"/><path d="M6 18l3-8h4l2 4h4M9 10l1.5-3h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Grab
+      </button>
+      <button type="button" class="service-chip flash" data-name="Flash">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="8" width="16" height="10" rx="1.5" stroke="currentColor" stroke-width="1.8"/><path d="M4 12h16M9 8V6.5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 6.5V8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Flash
+      </button>
+      <button type="button" class="service-chip post" data-name="ไปรษณีย์">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3.5" y="6" width="17" height="12" rx="1.5" stroke="currentColor" stroke-width="1.8"/><path d="M4 7.5l8 6 8-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        ไปรษณีย์
+      </button>
+      <button type="button" class="service-chip custom" data-name="">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        พิมพ์เอง
+      </button>
+    </div>
     <input type="text" id="guestName" placeholder="เช่น พี่ไปรษณีย์, Grab, ลูกค้า" maxlength="60">
 
     <label class="field-label gap">มาทำอะไร</label>
@@ -474,6 +568,26 @@
     f.style.setProperty("--glow-color", glowColor);
     particleField.appendChild(f);
   }
+
+  // ---- เลือกชื่อด่วน (บริการขนส่ง) ----
+  const guestNameInput = document.getElementById("guestName");
+  const serviceChips = document.querySelectorAll(".service-chip");
+  serviceChips.forEach(chip => {
+    chip.addEventListener("click", () => {
+      serviceChips.forEach(c => c.classList.remove("active"));
+      chip.classList.add("active");
+      if (chip.classList.contains("custom")) {
+        guestNameInput.value = "";
+        guestNameInput.focus();
+      } else {
+        guestNameInput.value = chip.dataset.name;
+      }
+    });
+  });
+  guestNameInput.addEventListener("input", () => {
+    const match = [...serviceChips].find(c => c.dataset.name === guestNameInput.value);
+    serviceChips.forEach(c => c.classList.toggle("active", c === match));
+  });
 
   // ---- เลือกวัตถุประสงค์ ----
   let selectedPurpose = null;
