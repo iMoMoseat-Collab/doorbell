@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>กดกริ่ง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chonburi&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #12162B;
+    --bg-deep-2: #1B2140;
+    --panel: rgba(255,255,255,0.06);
+    --panel-border: rgba(255,255,255,0.10);
+    --brass: #C9974D;
+    --brass-light: #E8C077;
+    --glow: #FFB86B;
+    --cream: #F5EFE4;
+    --cream-dim: rgba(245,239,228,0.62);
+    --sage: #8FBF9F;
+    --danger: #E08585;
+    --ink: #0A0D1D;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    overscroll-behavior: none;
+  }
+
+  body {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    color: var(--cream);
+    background: radial-gradient(120% 90% at 50% -10%, var(--bg-deep-2) 0%, var(--bg-deep) 55%, var(--ink) 100%);
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+    position: relative;
+    overflow-x: hidden;
+    transition: background 1.2s ease;
+  }
+
+  /* ambient porch glow, position/color shifts by time of day via JS custom properties */
+  .glow-orb {
+    position: fixed;
+    top: -140px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 380px;
+    height: 380px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--glow-color, var(--glow)) 0%, transparent 70%);
+    opacity: var(--glow-opacity, 0.35);
+    filter: blur(10px);
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 1.2s ease, background 1.2s ease;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 440px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 18px;
+  }
+
+  header { text-align: center; padding-top: 6px; }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--cream-dim);
+    margin: 0 0 10px;
+  }
+
+  h1 {
+    font-family: 'Chonburi', cursive;
+    font-weight: 400;
+    font-size: 34px;
+    margin: 0 0 6px;
+    color: var(--brass-light);
+    text-shadow: 0 0 24px rgba(233,192,119,0.25);
+  }
+
+  .sub {
+    font-size: 14px;
+    color: var(--cream-dim);
+    margin: 0;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 20px;
+    padding: 18px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  label.field-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--cream);
+    margin: 0 0 8px;
+  }
+
+  .field-label .opt {
+    font-weight: 400;
+    color: var(--cream-dim);
+    font-size: 12px;
+  }
+
+  input[type="text"], textarea {
+    width: 100%;
+    background: rgba(0,0,0,0.22);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    color: var(--cream);
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+
+  input[type="text"]:focus, textarea:focus {
+    border-color: var(--brass);
+  }
+
+  input::placeholder, textarea::placeholder { color: rgba(245,239,228,0.32); }
+
+  textarea { resize: none; min-height: 64px; font-family: inherit; }
+
+  .chips {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,0,0,0.22);
+    border: 1px solid var(--panel-border);
+    border-radius: 14px;
+    padding: 12px 10px;
+    color: var(--cream);
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+    text-align: left;
+  }
+
+  .chip .emoji { font-size: 18px; }
+
+  .chip.active {
+    border-color: var(--brass);
+    background: linear-gradient(135deg, rgba(201,151,77,0.28), rgba(201,151,77,0.10));
+  }
+
+  .chip:active { transform: scale(0.97); }
+
+  .gap { margin-top: 14px; }
+
+  .hint {
+    font-size: 12px;
+    color: var(--danger);
+    margin: 8px 2px 0;
+    min-height: 16px;
+    opacity: 0;
+    transform: translateY(-2px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .hint.show { opacity: 1; transform: translateY(0); }
+
+  .ring-zone {
+    margin-top: auto;
+    padding-top: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .bell-btn {
+    position: relative;
+    width: 132px;
+    height: 132px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    background: radial-gradient(circle at 35% 30%, var(--brass-light), var(--brass) 55%, #8a6a34 100%);
+    box-shadow: 0 10px 30px rgba(201,151,77,0.35), inset 0 2px 6px rgba(255,255,255,0.35), inset 0 -6px 10px rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.12s ease, box-shadow 0.3s ease, filter 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .bell-btn:active { transform: scale(0.94); }
+
+  .bell-btn:disabled {
+    filter: grayscale(0.4) brightness(0.75);
+    cursor: default;
+  }
+
+  .bell-btn svg { width: 52px; height: 52px; }
+
+  .ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid var(--brass-light);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .ring.animate {
+    animation: expand 0.9s ease-out forwards;
+  }
+
+  @keyframes expand {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.9); opacity: 0; }
+  }
+
+  .ring-caption {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--cream);
+    text-align: center;
+  }
+
+  .ring-status {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--cream-dim);
+    text-align: center;
+    min-height: 16px;
+  }
+
+  .ring-status.success { color: var(--sage); }
+  .ring-status.error { color: var(--danger); }
+
+  footer {
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: rgba(245,239,228,0.28);
+    padding-top: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow-orb" id="glowOrb"></div>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow" id="timeEyebrow">—</p>
+    <h1>กดกริ่ง</h1>
+    <p class="sub">แจ้งเจ้าของบ้านให้รู้ว่าคุณมาถึงแล้ว</p>
+  </header>
+
+  <div class="panel">
+    <label class="field-label" for="guestName">ชื่อของคุณ <span class="opt">(ไม่ระบุก็ได้)</span></label>
+    <input type="text" id="guestName" placeholder="เช่น พี่ไปรษณีย์, Grab, ลูกค้า" maxlength="60">
+
+    <label class="field-label gap">มาทำอะไร</label>
+    <div class="chips" id="purposeChips">
+      <button type="button" class="chip" data-value="ส่งอาหาร"><span class="emoji">🍜</span>ส่งอาหาร</button>
+      <button type="button" class="chip" data-value="ส่งพัสดุ"><span class="emoji">📦</span>ส่งพัสดุ</button>
+      <button type="button" class="chip" data-value="รับยา"><span class="emoji">💊</span>รับยา</button>
+      <button type="button" class="chip" data-value="อื่นๆ"><span class="emoji">✍️</span>อื่นๆ</button>
+    </div>
+    <p class="hint" id="purposeHint">เลือกเหตุผลที่มาก่อนกดกริ่ง</p>
+
+    <label class="field-label gap" for="guestMsg">ข้อความเพิ่มเติม <span class="opt">(ถ้ามี)</span></label>
+    <textarea id="guestMsg" placeholder="เช่น รอที่หน้าประตูสักครู่" maxlength="140"></textarea>
+  </div>
+
+  <div class="ring-zone">
+    <button class="bell-btn" id="bellBtn" aria-label="กดกริ่ง">
+      <span class="ring" id="ringFx"></span>
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 3C9.5 3 8 5 8 7.5v3c0 1.2-.5 2.3-1.4 3.1L5 15.2c-.6.5-.3 1.5.5 1.5h13c.8 0 1.1-1 .5-1.5l-1.6-1.6c-.9-.8-1.4-1.9-1.4-3.1v-3C16 5 14.5 3 12 3z" stroke="#12162B" stroke-width="1.6" stroke-linejoin="round" fill="rgba(10,13,29,0.15)"/>
+        <path d="M10 18a2 2 0 0 0 4 0" stroke="#12162B" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <p class="ring-caption" id="ringCaption">แตะเพื่อกดกริ่ง</p>
+    <p class="ring-status" id="ringStatus"></p>
+  </div>
+
+  <footer>MORKWAN HOME · กริ่งประตู</footer>
+
+</div>
+
+<script>
+  // ---- ตั้งค่า ----
+  // เปลี่ยน URL นี้เป็น endpoint จริงตอนต่อ Vercel Function
+  const RING_ENDPOINT = "/api/ring";
+  const COOLDOWN_SECONDS = 45;
+
+  // ---- โทนสีตามช่วงเวลา ----
+  const hour = new Date().getHours();
+  let eyebrowText, glowColor, glowOpacity;
+  if (hour >= 5 && hour < 11) {
+    eyebrowText = "อรุณสวัสดิ์"; glowColor = "#FFD9A0"; glowOpacity = "0.28";
+  } else if (hour >= 11 && hour < 17) {
+    eyebrowText = "ช่วงกลางวัน"; glowColor = "#FFE9C2"; glowOpacity = "0.18";
+  } else if (hour >= 17 && hour < 20) {
+    eyebrowText = "โพล้เพล้"; glowColor = "#FFB86B"; glowOpacity = "0.4";
+  } else {
+    eyebrowText = "ยามค่ำคืน"; glowColor = "#7C8CD9"; glowOpacity = "0.3";
+  }
+  document.getElementById("timeEyebrow").textContent = eyebrowText;
+  document.getElementById("glowOrb").style.setProperty("--glow-color", glowColor);
+  document.getElementById("glowOrb").style.setProperty("--glow-opacity", glowOpacity);
+
+  // ---- เลือกวัตถุประสงค์ ----
+  let selectedPurpose = null;
+  const chips = document.querySelectorAll(".chip");
+  const purposeHint = document.getElementById("purposeHint");
+  chips.forEach(chip => {
+    chip.addEventListener("click", () => {
+      chips.forEach(c => c.classList.remove("active"));
+      chip.classList.add("active");
+      selectedPurpose = chip.dataset.value;
+      purposeHint.classList.remove("show");
+    });
+  });
+
+  // ---- กดกริ่ง ----
+  const bellBtn = document.getElementById("bellBtn");
+  const ringFx = document.getElementById("ringFx");
+  const ringCaption = document.getElementById("ringCaption");
+  const ringStatus = document.getElementById("ringStatus");
+
+  let cooldownTimer = null;
+
+  function startCooldown(seconds) {
+    let remaining = seconds;
+    bellBtn.disabled = true;
+    const tick = () => {
+      const m = Math.floor(remaining / 60);
+      const s = String(remaining % 60).padStart(2, "0");
+      ringCaption.textContent = `กดกริ่งได้อีกครั้งใน ${m}:${s}`;
+      remaining--;
+      if (remaining < 0) {
+        clearInterval(cooldownTimer);
+        bellBtn.disabled = false;
+        ringCaption.textContent = "แตะเพื่อกดกริ่ง";
+        ringStatus.textContent = "";
+        ringStatus.className = "ring-status";
+      }
+    };
+    tick();
+    cooldownTimer = setInterval(tick, 1000);
+  }
+
+  async function sendRing() {
+    if (!selectedPurpose) {
+      purposeHint.classList.add("show");
+      document.getElementById("purposeChips").animate(
+        [{ transform: "translateX(-4px)" }, { transform: "translateX(4px)" }, { transform: "translateX(0)" }],
+        { duration: 220 }
+      );
+      return;
+    }
+
+    bellBtn.disabled = true;
+    ringFx.classList.remove("animate");
+    void ringFx.offsetWidth; // reflow เพื่อ trigger animation ใหม่
+    ringFx.classList.add("animate");
+
+    ringCaption.textContent = "กำลังส่ง...";
+    ringStatus.textContent = "";
+    ringStatus.className = "ring-status";
+
+    const payload = {
+      name: document.getElementById("guestName").value.trim() || "ไม่ระบุชื่อ",
+      purpose: selectedPurpose,
+      message: document.getElementById("guestMsg").value.trim(),
+      time: new Date().toISOString()
+    };
+
+    try {
+      const res = await fetch(RING_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error("bad status");
+
+      ringCaption.textContent = "ส่งแจ้งเตือนแล้ว";
+      ringStatus.textContent = "รอสักครู่ เจ้าของบ้านกำลังมา";
+      ringStatus.className = "ring-status success";
+      startCooldown(COOLDOWN_SECONDS);
+    } catch (err) {
+      ringCaption.textContent = "ส่งไม่สำเร็จ";
+      ringStatus.textContent = "แตะปุ่มอีกครั้งเพื่อลองใหม่";
+      ringStatus.className = "ring-status error";
+      bellBtn.disabled = false;
+    }
+  }
+
+  bellBtn.addEventListener("click", sendRing);
+</script>
+
+</body>
+</html>
