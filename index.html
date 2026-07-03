@@ -318,9 +318,25 @@
 
 <script>
   // ---- ตั้งค่า ----
-  // เปลี่ยน URL นี้เป็น endpoint จริงตอนต่อ Vercel Function
-  const RING_ENDPOINT = "/api/ring";
+  // วาง Discord Webhook URL ของคุณตรงนี้ (Server Settings > Integrations > Webhooks > Copy URL)
+  // คำเตือน: ค่านี้จะถูกมองเห็นได้จาก view-source ของทุกคนที่เปิดหน้านี้ (ยอมรับความเสี่ยงแล้วตามที่คุยกัน)
+  const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1522560371146096790/MGRZVWG5BmOzXqLD9_gSKB2iHM0IZUvpgSbU9FyJU5kVLkXdSA5YzLTKqtCLLb84Ed2x";
   const COOLDOWN_SECONDS = 45;
+
+  const PURPOSE_EMOJI = {
+    "ส่งอาหาร": "🍜",
+    "ส่งพัสดุ": "📦",
+    "รับยา": "💊",
+    "อื่นๆ": "✍️"
+  };
+
+  function formatThaiTime(date) {
+    return new Intl.DateTimeFormat("th-TH-u-ca-buddhist", {
+      dateStyle: "long",
+      timeStyle: "short",
+      timeZone: "Asia/Bangkok"
+    }).format(date);
+  }
 
   // ---- โทนสีตามช่วงเวลา ----
   const hour = new Date().getHours();
@@ -380,6 +396,12 @@
   }
 
   async function sendRing() {
+    if (DISCORD_WEBHOOK_URL.includes("PASTE_YOUR")) {
+      ringCaption.textContent = "ยังไม่ได้ตั้งค่า Webhook URL";
+      ringStatus.textContent = "แก้ DISCORD_WEBHOOK_URL ในโค้ดก่อนใช้งานจริง";
+      ringStatus.className = "ring-status error";
+      return;
+    }
     if (!selectedPurpose) {
       purposeHint.classList.add("show");
       document.getElementById("purposeChips").animate(
@@ -398,18 +420,27 @@
     ringStatus.textContent = "";
     ringStatus.className = "ring-status";
 
-    const payload = {
-      name: document.getElementById("guestName").value.trim() || "ไม่ระบุชื่อ",
-      purpose: selectedPurpose,
-      message: document.getElementById("guestMsg").value.trim(),
-      time: new Date().toISOString()
+    const guestName = document.getElementById("guestName").value.trim() || "ไม่ระบุชื่อ";
+    const guestMsg = document.getElementById("guestMsg").value.trim();
+    const emoji = PURPOSE_EMOJI[selectedPurpose] || "🔔";
+
+    const embed = {
+      title: `${emoji} มีคนกดกริ่ง — ${selectedPurpose}`,
+      color: 0xC9974D,
+      fields: [
+        { name: "ชื่อ", value: guestName, inline: true },
+        { name: "เวลา", value: formatThaiTime(new Date()), inline: true }
+      ]
     };
+    if (guestMsg) {
+      embed.fields.push({ name: "ข้อความ", value: guestMsg, inline: false });
+    }
 
     try {
-      const res = await fetch(RING_ENDPOINT, {
+      const res = await fetch(DISCORD_WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ embeds: [embed] })
       });
       if (!res.ok) throw new Error("bad status");
 
