@@ -448,6 +448,7 @@
     </div>
     <div class="or-divider"><span>หรือ</span></div>
     <input type="text" id="guestName" placeholder="พิมพ์ชื่อของคุณเอง เช่น ลูกค้า, คุณสมชาย" maxlength="60">
+    <p class="hint" id="nameHint">คนไข้ที่มารับยา กรุณาระบุชื่อจริงด้วย เพื่อป้องกันสับสนยา</p>
 
     <div class="rule"></div>
 
@@ -493,7 +494,7 @@
 <script>
   const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1522560371146096790/MGRZVWG5BmOzXqLD9_gSKB2iHM0IZUvpgSbU9FyJU5kVLkXdSA5YzLTKqtCLLb84Ed2x";
   // เบอร์โทรเจ้าหน้าที่คลินิก ใช้ตอนแขกกดปุ่มโทรแทนกริ่ง (แก้เป็นเบอร์จริงของคลินิก รูปแบบ 0812345678)
-  const CLINIC_PHONE = "0800000000";
+  const CLINIC_PHONE = "0646689544";
   document.getElementById("callBtn").href = `tel:${CLINIC_PHONE}`;
   const COOLDOWN_SECONDS = 45;
 
@@ -570,6 +571,7 @@
   guestNameInput.addEventListener("input", () => {
     const match = [...serviceChips].find(c => c.dataset.name === guestNameInput.value);
     serviceChips.forEach(c => c.classList.toggle("active", c === match));
+    document.getElementById("nameHint").classList.remove("show");
     updateLivePreview();
   });
 
@@ -696,6 +698,19 @@
       );
       return;
     }
+
+    const isPatient = document.querySelector(".service-chip.patient").classList.contains("active");
+    const nameHint = document.getElementById("nameHint");
+    if (isPatient && selectedPurpose === "รับยา" && guestNameInput.value.trim() === "คนไข้") {
+      nameHint.classList.add("show");
+      guestNameInput.focus();
+      guestNameInput.animate(
+        [{ transform: "translateX(-4px)" }, { transform: "translateX(4px)" }, { transform: "translateX(0)" }],
+        { duration: 220 }
+      );
+      return;
+    }
+    nameHint.classList.remove("show");
 
     bellBtn.disabled = true;
     playRipple();
