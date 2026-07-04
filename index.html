@@ -671,6 +671,20 @@
     return femaleNamed || thaiVoices[0];
   }
 
+  // ---- ปลดล็อกเสียงพูดด้วย user gesture แรกที่แตะหน้าจอ (มือถือหลายรุ่นบล็อกเสียงถ้าไม่ได้เริ่มจากการแตะโดยตรง) ----
+  function unlockSpeech() {
+    if (!window.speechSynthesis) return;
+    try {
+      const unlockUtter = new SpeechSynthesisUtterance(" ");
+      unlockUtter.volume = 0;
+      speechSynthesis.speak(unlockUtter);
+    } catch (e) { /* ไม่เป็นไร */ }
+    document.removeEventListener("click", unlockSpeech);
+    document.removeEventListener("touchend", unlockSpeech);
+  }
+  document.addEventListener("click", unlockSpeech, { once: true });
+  document.addEventListener("touchend", unlockSpeech, { once: true });
+
   function speak(text) {
     if (!voiceEnabled || !window.speechSynthesis) return;
     try {
@@ -710,8 +724,9 @@
     }, 22);
   }
 
-  const GREETING = `${greetPrefix} 🌿 ยินดีต้อนรับสู่คลินิกหมอขวัญ แพทย์แผนจีน ดิฉันเป็นผู้ช่วย AI ประจำคลินิกค่ะ รบกวนแจ้งหน่อยนะคะว่าใครมาคะ?`;
-  typeToBubble(GREETING, () => speak(GREETING));
+  const GREETING = `${greetPrefix} ยินดีต้อนรับสู่คลินิกหมอขวัญ แพทย์แผนจีน ดิฉันเป็นผู้ช่วย AI ประจำคลินิกค่ะ รบกวนแจ้งหน่อยนะคะว่าใครมาคะ?`;
+  typeToBubble(GREETING);
+  speak(GREETING);
 
   const guestNameInput = document.getElementById("guestName");
   const serviceChips = document.querySelectorAll(".service-chip[data-name]");
@@ -750,7 +765,8 @@
     } else {
       msg = `รับทราบค่ะ ${PURPOSE_EMOJI[selectedPurpose] || ""} ${selectedPurpose} — ขอทราบชื่อด้วยนะคะ`;
     }
-    typeToBubble(msg, () => speak(msg));
+    typeToBubble(msg);
+    speak(msg);
   }
 
   serviceChips.forEach(chip => {
@@ -771,7 +787,7 @@
           guestNameInput.focus();
           
           const nameHint = document.getElementById("nameHint");
-          nameHint.textContent = "กรุณาระบุชื่อคนไข้ เพื่อให้เจ้าหน้าทีจ่ายยาได้ถูกต้อง";
+          nameHint.textContent = "กรุณาระบุชื่อคนไข้ด้วยค่ะ";
           nameHint.classList.add("show");
         } else {
           guestNameInput.value = chip.dataset.name;
@@ -989,14 +1005,16 @@
       playEmojiConfetti(selectedPurpose);
       startCooldown(COOLDOWN_SECONDS);
       const successMsg = "กดกริ่งเรียบร้อยค่ะ เจ้าหน้าที่ได้รับแจ้งแล้ว รอสักครู่นะคะ";
-      typeToBubble(successMsg, () => speak(successMsg));
+      typeToBubble(successMsg);
+      speak(successMsg);
     } catch (err) {
       ringCaption.textContent = "ส่งไม่สำเร็จ";
       ringStatus.textContent = "แตะปุ่มอีกครั้งเพื่อลองใหม่ หรือโทรหาเจ้าหน้าที่แทน";
       ringStatus.className = "ring-status error";
       bellBtn.disabled = false;
       const errorMsg = "ขออภัยค่ะ ส่งแจ้งเตือนไม่สำเร็จ ลองกดใหม่อีกครั้ง หรือโทรหาเจ้าหน้าที่โดยตรงนะคะ";
-      typeToBubble(errorMsg, () => speak(errorMsg));
+      typeToBubble(errorMsg);
+      speak(errorMsg);
     }
   }
 
