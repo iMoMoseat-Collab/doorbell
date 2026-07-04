@@ -66,7 +66,6 @@
 
   @keyframes rise { 0% { opacity: 0; transform: translateY(14px); } 100% { opacity: 1; transform: translateY(0); } }
 
-  /* corner ornament ticks, evokes a seal / certificate frame */
   .seal-card::before, .seal-card::after {
     content: "";
     position: absolute;
@@ -488,7 +487,6 @@
 
 <script>
   const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1522560371146096790/MGRZVWG5BmOzXqLD9_gSKB2iHM0IZUvpgSbU9FyJU5kVLkXdSA5YzLTKqtCLLb84Ed2x";
-  // เบอร์โทรเจ้าหน้าที่คลินิก ใช้ตอนแขกกดปุ่มโทรแทนกริ่ง (แก้เป็นเบอร์จริงของคลินิก รูปแบบ 0812345678)
   const CLINIC_PHONE = "0646689544";
   document.getElementById("callBtn").href = `tel:${CLINIC_PHONE}`;
   const COOLDOWN_SECONDS = 45;
@@ -530,6 +528,7 @@
   otherChip.addEventListener("click", () => {
     serviceChips.forEach(c => c.classList.remove("active"));
     guestNameInput.value = "";
+    guestNameInput.placeholder = "พิมพ์ชื่อของคุณเอง เช่น ลูกค้า, คุณสมชาย";
     guestNameInput.focus();
     updateLivePreview();
   });
@@ -553,19 +552,33 @@
     chip.addEventListener("click", () => {
       const alreadyActive = chip.classList.contains("active");
       serviceChips.forEach(c => c.classList.remove("active"));
+      
       if (alreadyActive) {
         guestNameInput.value = "";
+        guestNameInput.placeholder = "พิมพ์ชื่อของคุณเอง เช่น ลูกค้า, คุณสมชาย";
         guestNameInput.focus();
       } else {
         chip.classList.add("active");
-        guestNameInput.value = chip.dataset.name;
+        
+        if (chip.dataset.name === "คนไข้") {
+          guestNameInput.value = ""; 
+          guestNameInput.placeholder = "ระบุชื่อ-นามสกุล ของคนไข้";
+          guestNameInput.focus();
+          
+          const nameHint = document.getElementById("nameHint");
+          nameHint.textContent = "กรุณาระบุชื่อคนไข้ เพื่อให้เจ้าหน้าทีจ่ายยาได้ถูกต้อง";
+          nameHint.classList.add("show");
+        } else {
+          guestNameInput.value = chip.dataset.name;
+          guestNameInput.placeholder = "พิมพ์ชื่อของคุณเอง เช่น ลูกค้า, คุณสมชาย";
+          document.getElementById("nameHint").classList.remove("show");
+        }
       }
       updateLivePreview();
     });
   });
+
   guestNameInput.addEventListener("input", () => {
-    const match = [...serviceChips].find(c => c.dataset.name === guestNameInput.value);
-    serviceChips.forEach(c => c.classList.toggle("active", c === match));
     document.getElementById("nameHint").classList.remove("show");
     updateLivePreview();
   });
@@ -616,7 +629,7 @@
         osc.start(now + n.start);
         osc.stop(now + n.start + n.dur + 0.05);
       });
-    } catch (e) { /* เบราว์เซอร์ไม่รองรับ Web Audio ก็แค่ไม่มีเสียง ไม่กระทบการทำงานหลัก */ }
+    } catch (e) { }
   }
 
   function playRipple() {
@@ -694,9 +707,13 @@
       return;
     }
 
-    const isPatient = document.querySelector(".service-chip.patient").classList.contains("active");
+    const activeChip = document.querySelector(".service-chip.active");
+    const isPatient = activeChip && activeChip.dataset.name === "คนไข้";
     const nameHint = document.getElementById("nameHint");
-    if (isPatient && selectedPurpose === "รับยา" && guestNameInput.value.trim() === "คนไข้") {
+    const guestName = guestNameInput.value.trim();
+
+    if (isPatient && guestName === "") {
+      nameHint.textContent = "กรุณาระบุชื่อคนไข้ด้วยครับ/ค่ะ";
       nameHint.classList.add("show");
       guestNameInput.focus();
       guestNameInput.animate(
@@ -715,7 +732,11 @@
     ringStatus.textContent = "";
     ringStatus.className = "ring-status";
 
-    const guestName = guestNameInput.value.trim() || "ไม่ระบุชื่อ";
+    let finalGuestName = guestName || "ไม่ระบุชื่อ";
+    if (isPatient && guestName !== "") {
+      finalGuestName = "(คนไข้) " + guestName;
+    }
+    
     const guestMsg = document.getElementById("guestMsg").value.trim();
     const emoji = PURPOSE_EMOJI[selectedPurpose] || "🔔";
     const color = PURPOSE_COLOR[selectedPurpose] || 0xC9974D;
@@ -730,7 +751,7 @@
       color: color,
       thumbnail: { url: `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/${PURPOSE_TWEMOJI[selectedPurpose] || "1f514"}.png` },
       fields: [
-        { name: "👤  ชื่อ", value: guestName, inline: true },
+        { name: "👤  ชื่อ", value: finalGuestName, inline: true },
         { name: "🕐  เวลา", value: formatThaiTime(new Date()), inline: true },
         { name: "📍  จุดที่มา", value: "หน้าคลินิก", inline: true }
       ],
