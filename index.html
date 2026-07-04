@@ -666,7 +666,7 @@
   <div class="tap-card">
     <div class="tap-icon">👆</div>
     <p class="tap-title">แตะหน้าจอเพื่อเริ่มต้น</p>
-    <p class="tap-sub">ให้ผู้ช่วย AI ทักทายด้วยเสียงค่ะ</p>
+    <p class="tap-sub">ให้ผู้ช่วย AI ช่วยเหลือค่ะ</p>
   </div>
 </div>
 
@@ -1006,6 +1006,22 @@
     typeToBubble(msg);
     speak(msg);
   }
+
+  // ---- ตอบรับด้วยเสียงตอนกดปุ่มโทรหาเจ้าหน้าที่ ----
+  const callBtn = document.getElementById("callBtn");
+  const CALL_CONFIRM_PHRASES = [
+    "ต้องการโทรหาเจ้าหน้าที่ใช่ไหมคะ เดี๋ยวดิฉันช่วยต่อสายให้ค่ะ",
+    "รับทราบค่ะ เดี๋ยวต่อสายหาเจ้าหน้าที่ให้เลยนะคะ รอสักครู่ค่ะ",
+    "ได้เลยค่ะ กำลังเชื่อมสายหาเจ้าหน้าที่ให้นะคะ"
+  ];
+  callBtn.addEventListener("click", () => {
+    clearTimeout(idleNudgeTimer);
+    const name = guestNameInput.value.trim();
+    const base = CALL_CONFIRM_PHRASES[Math.floor(Math.random() * CALL_CONFIRM_PHRASES.length)];
+    const msg = name ? `คุณ${name} ${base}` : base;
+    typeToBubble(msg);
+    speak(msg);
+  });
 
   serviceChips.forEach(chip => {
     chip.addEventListener("click", () => {
