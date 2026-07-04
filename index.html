@@ -42,15 +42,43 @@
   .bloom.a { top: -60px; left: -100px; background: var(--gold); }
   .bloom.b { bottom: -80px; right: -100px; background: var(--jade); }
 
-  .wrap {
+  .wrap-outer {
     position: relative;
     z-index: 1;
     max-width: 460px;
     margin: 0 auto;
-    padding: max(28px, env(safe-area-inset-top)) 18px max(28px, env(safe-area-inset-bottom));
+    padding: max(20px, env(safe-area-inset-top)) 18px max(28px, env(safe-area-inset-bottom));
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    gap: 14px;
     min-height: 100dvh;
+  }
+
+  .wrap { width: 100%; }
+
+  .ai-panel {
+    position: relative;
+    width: 100%;
+    background: linear-gradient(160deg, var(--jade-light) 0%, #EAF5EE 55%, var(--card) 100%);
+    border: 1px solid rgba(47,143,111,0.22);
+    border-radius: 24px;
+    padding: 16px 16px;
+    box-shadow: 0 14px 34px rgba(31,107,82,0.16);
+    animation: rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    overflow: hidden;
+  }
+
+  .ai-panel::before {
+    content: "";
+    position: absolute;
+    top: -30px;
+    right: -30px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,151,77,0.25), transparent 70%);
+    pointer-events: none;
   }
 
   .seal-card {
@@ -83,20 +111,94 @@
     margin-bottom: 18px;
   }
 
-  .ai-avatar {
+  .ai-character {
     position: relative;
     flex-shrink: 0;
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, var(--jade-light), var(--jade) 65%, var(--jade-dark) 100%);
-    border: 2px solid var(--gold);
+    width: 60px;
+    height: 72px;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
+    animation: avatar-bob 3.4s ease-in-out infinite;
   }
 
-  .ai-avatar svg { width: 22px; height: 22px; }
+  @keyframes avatar-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+
+  .ai-character svg { width: 60px; height: 72px; position: relative; z-index: 2; overflow: visible; }
+
+  .ai-eye {
+    transform-origin: center;
+    animation: blink 4.2s ease-in-out infinite;
+  }
+  .ai-eye-r { animation-delay: 0.05s; }
+
+  @keyframes blink {
+    0%, 92%, 100% { transform: scaleY(1); }
+    95% { transform: scaleY(0.12); }
+  }
+
+  .ai-mouth { transform-origin: center; transition: d 0.15s ease; }
+
+  .ai-character.speaking .ai-mouth {
+    animation: talk 0.32s ease-in-out infinite;
+  }
+
+  @keyframes talk {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(1.9); }
+  }
+
+  .speak-ring {
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    width: 46px;
+    height: 46px;
+    margin-left: -23px;
+    border-radius: 50%;
+    border: 1.5px solid var(--jade);
+    opacity: 0;
+  }
+
+  .ai-character.speaking .speak-ring {
+    animation: speak-pulse 1.3s ease-out infinite;
+  }
+
+  .ai-character.speaking .speak-ring.r2 { animation-delay: 0.5s; }
+
+  @keyframes speak-pulse {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+
+  .typing-dots {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 0;
+  }
+
+  .typing-dots.show { display: inline-flex; }
+
+  .typing-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--jade);
+    opacity: 0.5;
+    animation: dot-bounce 1s ease-in-out infinite;
+  }
+
+  .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes dot-bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
 
   .ai-online {
     position: absolute;
@@ -141,15 +243,31 @@
 
   .ai-bubble {
     position: relative;
-    background: #FAF3E5;
-    border: 1.5px solid var(--card-border);
-    border-radius: 4px 16px 16px 16px;
-    padding: 11px 13px;
+    background: #FFFEFA;
+    border: 2.5px solid var(--ink);
+    border-radius: 4px 20px 20px 20px;
+    padding: 11px 14px;
     font-size: 13.5px;
+    font-weight: 500;
     line-height: 1.55;
     color: var(--text);
     overflow-wrap: break-word;
+    animation: bubble-fade 0.3s ease both;
+    box-shadow: 3px 3px 0 rgba(26,42,33,0.18);
+    margin-left: 4px;
   }
+
+  .bubble-tail-dot {
+    position: absolute;
+    background: #FFFEFA;
+    border: 2.5px solid var(--ink);
+    border-radius: 50%;
+  }
+
+  .bubble-tail-dot.d1 { width: 10px; height: 10px; top: -6px; left: -6px; }
+  .bubble-tail-dot.d2 { width: 5px; height: 5px; top: -13px; left: -12px; }
+
+  @keyframes bubble-fade { 0% { opacity: 0.4; transform: translateY(2px); } 100% { opacity: 1; transform: translateY(0); } }
 
   .ai-cursor {
     display: inline-block;
@@ -520,7 +638,7 @@
   .tap-sub { font-size: 13px; color: var(--text-dim); margin: 0; }
 
   @media (max-width: 360px) {
-    .wrap { padding-left: 12px; padding-right: 12px; }
+    .wrap-outer { padding-left: 12px; padding-right: 12px; }
     .seal-card { padding: 30px 16px 22px; }
     h1 { font-size: 34px; }
     .tagline { font-size: 13px; }
@@ -552,23 +670,48 @@
   </div>
 </div>
 
-<div class="wrap">
-  <div class="seal-card">
-
-    <div class="ai-block">
-      <div class="ai-avatar">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="9" cy="10" r="1.2" fill="#FFFEFA"/>
-          <circle cx="15" cy="10" r="1.2" fill="#FFFEFA"/>
-          <path d="M8.5 14c1 1 2 1.5 3.5 1.5s2.5-.5 3.5-1.5" stroke="#FFFEFA" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        <span class="ai-online"></span>
-      </div>
-      <div class="ai-bubble-wrap">
-        <p class="ai-name">ผู้ช่วย AI ประจำคลินิก <button type="button" class="voice-toggle" id="voiceToggle" aria-label="เปิด/ปิดเสียง">🔊</button></p>
-        <div class="ai-bubble" id="aiBubble"><span id="aiBubbleText"></span><span class="ai-cursor" id="aiCursor">▍</span></div>
+<div class="wrap-outer">
+<div class="ai-panel">
+  <div class="ai-block">
+    <div class="ai-character" id="aiAvatar">
+      <span class="speak-ring r1"></span>
+      <span class="speak-ring r2"></span>
+      <svg viewBox="0 0 80 96" xmlns="http://www.w3.org/2000/svg">
+        <!-- ร่างกาย/เสื้อคลุม -->
+        <path d="M14 94c-1-20 4-34 26-34s27 14 26 34z" fill="var(--jade)" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M28 62c2 6 22 6 24 0" stroke="var(--gold)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <!-- แขน -->
+        <path d="M14 88c-6-2-10-8-9-16" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M66 88c6-2 10-8 9-16" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <!-- ใบสมุนไพรประดับ -->
+        <path d="M46 8c4-6 12-6 14-1-4 5-11 6-14 1z" fill="var(--gold-light)" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/>
+        <!-- หัว -->
+        <circle cx="40" cy="34" r="24" fill="#FFFEFA" stroke="var(--ink)" stroke-width="2.5"/>
+        <!-- แก้มปัด -->
+        <ellipse cx="25" cy="40" rx="4" ry="2.5" fill="var(--gold-light)" opacity="0.7"/>
+        <ellipse cx="55" cy="40" rx="4" ry="2.5" fill="var(--gold-light)" opacity="0.7"/>
+        <!-- ตา -->
+        <ellipse class="ai-eye" cx="31" cy="32" rx="2.6" ry="3.2" fill="var(--ink)"/>
+        <ellipse class="ai-eye ai-eye-r" cx="49" cy="32" rx="2.6" ry="3.2" fill="var(--ink)"/>
+        <!-- ปาก -->
+        <path class="ai-mouth" d="M32 43c3 3 13 3 16 0" stroke="var(--ink)" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+      </svg>
+      <span class="ai-online"></span>
+    </div>
+    <div class="ai-bubble-wrap">
+      <p class="ai-name">ผู้ช่วย AI ประจำคลินิก <button type="button" class="voice-toggle" id="voiceToggle" aria-label="เปิด/ปิดเสียง">🔊</button></p>
+      <div class="ai-bubble" id="aiBubble">
+        <span class="typing-dots" id="typingDots"><span></span><span></span><span></span></span>
+        <span id="aiBubbleText"></span><span class="ai-cursor" id="aiCursor">▍</span>
+        <span class="bubble-tail-dot d1"></span>
+        <span class="bubble-tail-dot d2"></span>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="seal-card">
 
     <div class="hero">
       <p class="eyebrow" id="timeEyebrow">—</p>
@@ -649,6 +792,7 @@
 
   </div>
 </div>
+</div>
 
 <script>
   const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1522560371146096790/MGRZVWG5BmOzXqLD9_gSKB2iHM0IZUvpgSbU9FyJU5kVLkXdSA5YzLTKqtCLLb84Ed2x";
@@ -726,13 +870,25 @@
     return text.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}\u{FE0F}]/gu, "").replace(/\s{2,}/g, " ").trim();
   }
 
+  // แทรกจุดหยุดพักเบาๆ ตรงคำลงท้ายประโยคภาษาไทย (ค่ะ/คะ/นะคะ) ให้จังหวะพูดฟังเป็นธรรมชาติขึ้น
+  // ใช้เฉพาะตอนพูดเท่านั้น ไม่กระทบข้อความที่แสดงในบับเบิล
+  function addSpeechPauses(text) {
+    return text
+      .replace(/(นะคะ|น่ะคะ)(?!$)/g, "$1, ")
+      .replace(/(ค่ะ|คะ)(?!$)(?!,)/g, "$1, ")
+      .replace(/,\s*,/g, ",")
+      .trim();
+  }
+
+  const aiAvatar = document.getElementById("aiAvatar");
+
   function speak(text) {
     if (!voiceEnabled || !window.speechSynthesis) return;
     try {
       speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(stripEmoji(text));
+      const utter = new SpeechSynthesisUtterance(stripEmoji(addSpeechPauses(text)));
       utter.lang = "th-TH";
-      utter.rate = 1.0;
+      utter.rate = 0.92;
       const voice = pickThaiFemaleVoice();
       if (voice) {
         utter.voice = voice;
@@ -741,6 +897,9 @@
         // ไม่พบเสียงไทยที่ระบุเพศชัดเจน ปรับ pitch ขึ้นเล็กน้อยให้ฟังดูเป็นเสียงผู้หญิงมากขึ้น
         utter.pitch = 1.3;
       }
+      utter.onstart = () => aiAvatar.classList.add("speaking");
+      utter.onend = () => aiAvatar.classList.remove("speaking");
+      utter.onerror = () => aiAvatar.classList.remove("speaking");
       speechSynthesis.speak(utter);
     } catch (e) { /* บางเบราว์เซอร์ไม่รองรับเสียงไทย ก็แค่ไม่มีเสียง ไม่กระทบการทำงานหลัก */ }
   }
@@ -748,31 +907,62 @@
   // ---- พิมพ์ข้อความทีละตัวอักษรในบับเบิล AI ----
   const aiBubbleText = document.getElementById("aiBubbleText");
   const aiCursor = document.getElementById("aiCursor");
+  const typingDots = document.getElementById("typingDots");
+  const aiBubble = document.getElementById("aiBubble");
   let typeTimer = null;
-  function typeToBubble(text, onDone) {
-    clearInterval(typeTimer);
-    aiCursor.classList.remove("done");
-    aiBubbleText.textContent = "";
-    let i = 0;
-    typeTimer = setInterval(() => {
-      aiBubbleText.textContent += text[i];
-      i++;
-      if (i >= text.length) {
-        clearInterval(typeTimer);
-        aiCursor.classList.add("done");
-        if (onDone) onDone();
-      }
-    }, 22);
+  let thinkTimer = null;
+
+  function replayBubbleFade() {
+    aiBubble.style.animation = "none";
+    void aiBubble.offsetWidth;
+    aiBubble.style.animation = "";
   }
 
-  const GREETING = `${greetPrefix} 🌿 ยินดีต้อนรับสู่คลินิกหมอขวัญ แพทย์แผนจีน ดิฉันเป็นผู้ช่วย AI ประจำคลินิกค่ะ รบกวนแจ้งหน่อยนะคะว่าใครมาคะ?`;
+  function typeToBubble(text, onDone) {
+    clearInterval(typeTimer);
+    clearTimeout(thinkTimer);
+    aiCursor.classList.add("done");
+    aiBubbleText.textContent = "";
+    typingDots.classList.add("show");
+    thinkTimer = setTimeout(() => {
+      typingDots.classList.remove("show");
+      replayBubbleFade();
+      aiCursor.classList.remove("done");
+      let i = 0;
+      typeTimer = setInterval(() => {
+        aiBubbleText.textContent += text[i];
+        i++;
+        if (i >= text.length) {
+          clearInterval(typeTimer);
+          aiCursor.classList.add("done");
+          if (onDone) onDone();
+        }
+      }, 22);
+    }, 550);
+  }
+
+  const GREETING = `${greetPrefix} 🌿 ยินดีต้อนรับสู่คลินิกหมอขวัญ แพทย์แผนจีนค่ะ ดิฉันเป็นผู้ช่วย AI ประจำคลินิกค่ะ รบกวนแจ้งหน่อยนะคะว่าใครมาคะ?`;
 
   const tapOverlay = document.getElementById("tapOverlay");
+  let idleNudgeTimer = null;
+  function startIdleNudge() {
+    clearTimeout(idleNudgeTimer);
+    idleNudgeTimer = setTimeout(() => {
+      const name = document.getElementById("guestName").value.trim();
+      if (!selectedPurpose && !name) {
+        const nudgeMsg = "หากพร้อมแล้ว เลือกได้เลยนะคะ 😊";
+        typeToBubble(nudgeMsg);
+        speak(nudgeMsg);
+      }
+    }, 18000);
+  }
+
   tapOverlay.addEventListener("click", () => {
     unlockSpeech();
     tapOverlay.classList.add("hidden");
     typeToBubble(GREETING);
     speak(GREETING);
+    startIdleNudge();
   }, { once: true });
 
   const guestNameInput = document.getElementById("guestName");
@@ -788,6 +978,7 @@
   const livePreview = document.getElementById("livePreview");
 
   function updateLivePreview() {
+    clearTimeout(idleNudgeTimer);
     const name = guestNameInput.value.trim();
     if (!selectedPurpose && !name) {
       livePreview.classList.remove("show");
@@ -1051,7 +1242,7 @@
       playSparkleBurst();
       playEmojiConfetti(selectedPurpose);
       startCooldown(COOLDOWN_SECONDS);
-      const successMsg = "กดกริ่งเรียบร้อยค่ะ เจ้าหน้าที่ได้รับแจ้งแล้ว รอสักครู่นะคะ";
+      const successMsg = "กดกริ่งเรียบร้อยค่ะ เจ้าหน้าที่ได้รับแจ้งแล้ว รอสักครู่นะคะ ขอบคุณที่มาเยือนคลินิกหมอขวัญนะคะ 🌿";
       typeToBubble(successMsg);
       speak(successMsg);
     } catch (err) {
