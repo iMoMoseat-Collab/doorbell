@@ -76,12 +76,97 @@
   .seal-card::before { top: 10px; left: 10px; border-right: none; border-bottom: none; border-top-left-radius: 10px; }
   .seal-card::after { bottom: 10px; right: 10px; border-left: none; border-top: none; border-bottom-right-radius: 10px; }
 
+  .ai-block {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .ai-avatar {
+    position: relative;
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--jade-light), var(--jade) 65%, var(--jade-dark) 100%);
+    border: 2px solid var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-avatar svg { width: 22px; height: 22px; }
+
+  .ai-online {
+    position: absolute;
+    bottom: -1px;
+    right: -1px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #4CAF7D;
+    border: 2px solid var(--card);
+    animation: pulse-online 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-online {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(76,175,125,0.5); }
+    50% { box-shadow: 0 0 0 4px rgba(76,175,125,0); }
+  }
+
+  .ai-bubble-wrap { flex: 1; min-width: 0; }
+
+  .ai-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--gold-dark);
+    margin: 2px 0 5px;
+  }
+
+  .voice-toggle {
+    background: none;
+    border: none;
+    font-size: 13px;
+    padding: 0;
+    cursor: pointer;
+    opacity: 0.85;
+    line-height: 1;
+  }
+
+  .voice-toggle.muted { opacity: 0.35; }
+
+  .ai-bubble {
+    position: relative;
+    background: #FAF3E5;
+    border: 1.5px solid var(--card-border);
+    border-radius: 4px 16px 16px 16px;
+    padding: 11px 13px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text);
+    overflow-wrap: break-word;
+  }
+
+  .ai-cursor {
+    display: inline-block;
+    color: var(--jade);
+    animation: blink-cursor 0.9s steps(1) infinite;
+  }
+
+  .ai-cursor.done { display: none; }
+
+  @keyframes blink-cursor { 50% { opacity: 0; } }
+
   .hero { text-align: center; margin-bottom: 6px; }
 
   .eyebrow {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 11.5px;
-    letter-spacing: 0.2em;
+    font-size: 12px;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--gold-dark);
     font-weight: 600;
@@ -92,12 +177,12 @@
     font-family: 'Chonburi', cursive;
     font-weight: 400;
     font-size: 42px;
-    line-height: 1.2;
-    margin: 0 0 6px;
+    line-height: 1.35;
+    margin: 0 0 8px;
     color: var(--jade-dark);
   }
 
-  .tagline { font-size: 14px; color: var(--text-dim); margin: 0 0 18px; }
+  .tagline { font-size: 14px; line-height: 1.5; color: var(--text-dim); margin: 0 0 18px; }
 
   .rule {
     height: 1px;
@@ -109,8 +194,10 @@
   .section-label {
     display: flex;
     align-items: center;
-    gap: 7px;
-    font-size: 13px;
+    flex-wrap: wrap;
+    gap: 6px 7px;
+    font-size: 13.5px;
+    line-height: 1.4;
     font-weight: 700;
     color: var(--jade-dark);
     margin: 0 0 12px;
@@ -196,7 +283,7 @@
     gap: 10px;
     margin: 12px 0;
     color: var(--text-dim);
-    font-size: 11.5px;
+    font-size: 12px;
     font-weight: 600;
   }
 
@@ -232,6 +319,7 @@
 
   .hint {
     font-size: 12.5px;
+    line-height: 1.5;
     font-weight: 500;
     color: var(--danger);
     margin: 9px 2px 0;
@@ -239,12 +327,14 @@
     opacity: 0;
     transform: translateY(-2px);
     transition: opacity 0.2s ease, transform 0.2s ease;
+    overflow-wrap: break-word;
   }
 
   .hint.show { opacity: 1; transform: translateY(0); }
 
   .live-preview {
     font-size: 12.5px;
+    line-height: 1.5;
     font-weight: 600;
     color: var(--jade-dark);
     margin: 9px 2px 0;
@@ -252,6 +342,8 @@
     opacity: 0;
     transform: translateY(-2px);
     transition: opacity 0.25s ease, transform 0.25s ease;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   .live-preview.show { opacity: 1; transform: translateY(0); }
@@ -319,11 +411,15 @@
 
   .ring-status {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
+    font-size: 11.5px;
+    line-height: 1.5;
     color: var(--text-dim);
     margin: 0;
     min-height: 14px;
     text-align: center;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    padding: 0 6px;
   }
 
   .ring-status.success { color: var(--jade-dark); }
@@ -349,7 +445,7 @@
 
   .call-btn svg { width: 17px; height: 17px; flex-shrink: 0; }
   .call-btn:active { transform: scale(0.97); background: rgba(47,143,111,0.16); }
-  .call-hint { font-size: 11px; color: var(--text-dim); text-align: center; margin: -2px 0 0; }
+  .call-hint { font-size: 11.5px; line-height: 1.4; color: var(--text-dim); text-align: center; margin: -2px 0 0; padding: 0 8px; }
 
   .sparkle-field { position: fixed; inset: 0; pointer-events: none; z-index: 4; }
 
@@ -383,10 +479,24 @@
   footer {
     text-align: center;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    color: rgba(38,52,41,0.4);
+    font-size: 10.5px;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+    color: rgba(38,52,41,0.45);
     margin-top: 20px;
+    padding: 0 6px;
+  }
+
+  @media (max-width: 360px) {
+    .wrap { padding-left: 12px; padding-right: 12px; }
+    .seal-card { padding: 30px 16px 22px; }
+    h1 { font-size: 34px; }
+    .tagline { font-size: 13px; }
+    .service-chip { padding: 8px 11px; font-size: 12.5px; }
+    .chip { padding: 11px 9px; font-size: 13px; }
+    .chip .emoji { font-size: 16px; }
+    .bell-btn { width: 96px; height: 96px; }
+    .bell-btn svg.bell-icon { width: 40px; height: 40px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -404,6 +514,21 @@
 
 <div class="wrap">
   <div class="seal-card">
+
+    <div class="ai-block">
+      <div class="ai-avatar">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="9" cy="10" r="1.2" fill="#FFFEFA"/>
+          <circle cx="15" cy="10" r="1.2" fill="#FFFEFA"/>
+          <path d="M8.5 14c1 1 2 1.5 3.5 1.5s2.5-.5 3.5-1.5" stroke="#FFFEFA" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="ai-online"></span>
+      </div>
+      <div class="ai-bubble-wrap">
+        <p class="ai-name">ผู้ช่วย AI ประจำคลินิก <button type="button" class="voice-toggle" id="voiceToggle" aria-label="เปิด/ปิดเสียง">🔊</button></p>
+        <div class="ai-bubble" id="aiBubble"><span id="aiBubbleText"></span><span class="ai-cursor" id="aiCursor">▍</span></div>
+      </div>
+    </div>
 
     <div class="hero">
       <p class="eyebrow" id="timeEyebrow">—</p>
@@ -515,12 +640,78 @@
   }
 
   const hour = new Date().getHours();
-  let eyebrowText;
-  if (hour >= 5 && hour < 11) eyebrowText = "อรุณสวัสดิ์";
-  else if (hour >= 11 && hour < 17) eyebrowText = "ช่วงกลางวัน";
-  else if (hour >= 17 && hour < 20) eyebrowText = "โพล้เพล้";
-  else eyebrowText = "ยามค่ำคืน";
+  let eyebrowText, greetPrefix;
+  if (hour >= 5 && hour < 11) { eyebrowText = "อรุณสวัสดิ์"; greetPrefix = "อรุณสวัสดิ์ค่ะ"; }
+  else if (hour >= 11 && hour < 17) { eyebrowText = "ช่วงกลางวัน"; greetPrefix = "สวัสดีค่ะ"; }
+  else if (hour >= 17 && hour < 20) { eyebrowText = "โพล้เพล้"; greetPrefix = "สวัสดีตอนเย็นค่ะ"; }
+  else { eyebrowText = "ยามค่ำคืน"; greetPrefix = "สวัสดีค่ะ ดึกแล้วนะคะ"; }
   document.getElementById("timeEyebrow").textContent = eyebrowText;
+
+  // ---- เสียงพูด AI (Web Speech API) ----
+  let voiceEnabled = true;
+  const voiceToggle = document.getElementById("voiceToggle");
+  voiceToggle.addEventListener("click", () => {
+    voiceEnabled = !voiceEnabled;
+    voiceToggle.textContent = voiceEnabled ? "🔊" : "🔇";
+    voiceToggle.classList.toggle("muted", !voiceEnabled);
+    if (!voiceEnabled && window.speechSynthesis) speechSynthesis.cancel();
+  });
+
+  let cachedVoices = [];
+  function loadVoices() { cachedVoices = window.speechSynthesis ? speechSynthesis.getVoices() : []; }
+  if (window.speechSynthesis) {
+    loadVoices();
+    speechSynthesis.onvoiceschanged = loadVoices;
+  }
+
+  function pickThaiFemaleVoice() {
+    const thaiVoices = cachedVoices.filter(v => v.lang && v.lang.toLowerCase().startsWith("th"));
+    if (thaiVoices.length === 0) return null;
+    const femaleNamed = thaiVoices.find(v => /female|kanya|narisa|premwadee|หญิง/i.test(v.name));
+    return femaleNamed || thaiVoices[0];
+  }
+
+  function speak(text) {
+    if (!voiceEnabled || !window.speechSynthesis) return;
+    try {
+      speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = "th-TH";
+      utter.rate = 1.0;
+      const voice = pickThaiFemaleVoice();
+      if (voice) {
+        utter.voice = voice;
+        utter.pitch = 1.0;
+      } else {
+        // ไม่พบเสียงไทยที่ระบุเพศชัดเจน ปรับ pitch ขึ้นเล็กน้อยให้ฟังดูเป็นเสียงผู้หญิงมากขึ้น
+        utter.pitch = 1.3;
+      }
+      speechSynthesis.speak(utter);
+    } catch (e) { /* บางเบราว์เซอร์ไม่รองรับเสียงไทย ก็แค่ไม่มีเสียง ไม่กระทบการทำงานหลัก */ }
+  }
+
+  // ---- พิมพ์ข้อความทีละตัวอักษรในบับเบิล AI ----
+  const aiBubbleText = document.getElementById("aiBubbleText");
+  const aiCursor = document.getElementById("aiCursor");
+  let typeTimer = null;
+  function typeToBubble(text, onDone) {
+    clearInterval(typeTimer);
+    aiCursor.classList.remove("done");
+    aiBubbleText.textContent = "";
+    let i = 0;
+    typeTimer = setInterval(() => {
+      aiBubbleText.textContent += text[i];
+      i++;
+      if (i >= text.length) {
+        clearInterval(typeTimer);
+        aiCursor.classList.add("done");
+        if (onDone) onDone();
+      }
+    }, 22);
+  }
+
+  const GREETING = `${greetPrefix} 🌿 ยินดีต้อนรับสู่คลินิกหมอขวัญ แพทย์แผนจีน ดิฉันเป็นผู้ช่วย AI ประจำคลินิกค่ะ รบกวนแจ้งหน่อยนะคะว่าใครมาคะ?`;
+  typeToBubble(GREETING, () => speak(GREETING));
 
   const guestNameInput = document.getElementById("guestName");
   const serviceChips = document.querySelectorAll(".service-chip[data-name]");
@@ -546,6 +737,20 @@
     if (name) parts.push(`จาก ${name}`);
     livePreview.textContent = "พร้อมส่ง: " + parts.join(" • ");
     livePreview.classList.add("show");
+  }
+
+  function aiRespondToSelection() {
+    const name = guestNameInput.value.trim();
+    if (!name && !selectedPurpose) return;
+    let msg;
+    if (name && selectedPurpose) {
+      msg = `รับทราบค่ะ ${PURPOSE_EMOJI[selectedPurpose] || ""} คุณ${name} มาเพื่อ${selectedPurpose}ใช่ไหมคะ พร้อมแล้วกดกริ่งด้านล่างได้เลยค่ะ`;
+    } else if (name) {
+      msg = `สวัสดีค่ะคุณ${name} รบกวนเลือกจุดประสงค์ที่มาด้านล่างด้วยนะคะ`;
+    } else {
+      msg = `รับทราบค่ะ ${PURPOSE_EMOJI[selectedPurpose] || ""} ${selectedPurpose} — ขอทราบชื่อด้วยนะคะ`;
+    }
+    typeToBubble(msg, () => speak(msg));
   }
 
   serviceChips.forEach(chip => {
@@ -575,6 +780,7 @@
         }
       }
       updateLivePreview();
+      aiRespondToSelection();
     });
   });
 
@@ -593,6 +799,7 @@
       selectedPurpose = chip.dataset.value;
       purposeHint.classList.remove("show");
       updateLivePreview();
+      aiRespondToSelection();
     });
   });
 
@@ -781,11 +988,15 @@
       playSparkleBurst();
       playEmojiConfetti(selectedPurpose);
       startCooldown(COOLDOWN_SECONDS);
+      const successMsg = "กดกริ่งเรียบร้อยค่ะ เจ้าหน้าที่ได้รับแจ้งแล้ว รอสักครู่นะคะ";
+      typeToBubble(successMsg, () => speak(successMsg));
     } catch (err) {
       ringCaption.textContent = "ส่งไม่สำเร็จ";
       ringStatus.textContent = "แตะปุ่มอีกครั้งเพื่อลองใหม่ หรือโทรหาเจ้าหน้าที่แทน";
       ringStatus.className = "ring-status error";
       bellBtn.disabled = false;
+      const errorMsg = "ขออภัยค่ะ ส่งแจ้งเตือนไม่สำเร็จ ลองกดใหม่อีกครั้ง หรือโทรหาเจ้าหน้าที่โดยตรงนะคะ";
+      typeToBubble(errorMsg, () => speak(errorMsg));
     }
   }
 
